@@ -95,27 +95,27 @@ import { handle } from "../../hooks.server";
     <p>enter the reviewer password to access black hole submissions.</p>
 
     {#if form?.error}
-      <p>                                                       </p>
+      <p class="error">{form.error}</p>
     {/if}
 
     <form method="POST" class="login-form">
       <label>
-        P
+        Password
         <input type="password" name="password" required />
       </label>
-      <bu
+      <button type="submit">Enter</button>
     </form>
   </main>
 {:else}
   <main class="page">
     <header class="header">
       <div>
-        <h1></h1>
+        <h1>Black Hole Reviewer</h1>
         <p>
-          l
+          logged in as <strong>{}</strong>
         </p>
       </div>
-      <div>
+      <div class="">
         <span></span>
       </div>
     </header>
