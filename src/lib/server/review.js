@@ -3,6 +3,26 @@ import { base } from '$lib/server/db.js';
 const BLACKHOLE_TABLE = 'BlackholeSubmissions';
 const PROJECTS_TABLE = 'Projects'
 
+function mapSubmissionWithProject() {
+    c
+    c
+
+    l
+
+    if (projectRec) {
+        project = {
+            id:
+            name:
+            description:
+            promptinfo:
+            shipURL:
+            githubURL:
+            projectImage:
+            
+        }
+    }
+}
+
 /**
  * Yes I know this is a copy of the server/blackhole.js but this does more
  * @returns {Promise<any[]>}

@@ -45,7 +45,6 @@
       submissions = submissions.filter((x: any) => x.id !== selected.id);
       message = `Approved submission ${updated.id}`;
 
-      // move selection to next
       selectedId = submissions[0]?.id ?? null;
     } catch (err) {
       const e = err as Error;
@@ -139,7 +138,7 @@
       </p>
     {:else}
       <section class="layout">
-        <!-- LEFT: list of submissions -->
+        <!-- LEFT SIDE: list of submissions -->
         <aside class="list-panel">
           {#each submissions as s}
             <button
@@ -171,7 +170,7 @@
           {/each}
         </aside>
 
-        <!-- RIGHT: detail for selected submission -->
+        <!-- RIGHT SIDE: detail for selected submissions -->
         <section class="detail-panel">
           {#if !selected}
             <p class="empty">select a submission from the left</p>

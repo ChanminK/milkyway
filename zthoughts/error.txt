@@ -17,8 +17,10 @@ specifiers in the lockfile don't match specifiers in package.json:
     6 dependencies are mismatched(same as above)
 
 3 warnings found (use docker --debug to expand):
-    SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "AIRTABLE_API_KEY") (line 6)
-    SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "STATS_API_KEY") (line 2)
-    SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "IDV_KEY") (line 3)
+    SecretsUsedInArgOrEnv: 
+    Do not use ARG or ENV instructions for sensitive data
+    (ARG "STATS_API_KEY") (line 2)
+    (ARG "IDV_KEY") (line 3)
+    (ARG "AIRTABLE_API_KEY") (line 6)
 
 FIND "frozen-lockfile"
