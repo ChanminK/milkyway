@@ -26,3 +26,5 @@ Notes on updating repo:
 VSCODE tells me:
     Do you want to install the recommended 'Container Tools' extension from Microsoft for the Docker language?
     Double chekc this and 
+
+Need to double check airtable variable names 

@@ -1,86 +1,95 @@
+<!--import { toLowerCase } from "zod";
+  import { handle } from "../../hooks.server";
+-->
 <script lang="ts">
-	import { toLowerCase } from "zod";
-import { handle } from "../../hooks.server";
-
   export let data: any;
-  export let form: any; 
+  export let form: any;
 
   let user = data.user ?? {};
   let submissions = Array.isArray(data.submissions) ? data.submissions : [];
 
-  let selectedId: string | null = submissions[0].id ?? null; 
+  let selectedId: string | null = submissions[0]?.id ?? null;
   let loadingAction: 'approve' | 'reject' | null = null;
   let message = '';
 
-  $: selected = submissions.find()
+  $: selected = submissions.find((s: any) => s.id === selectedId) ?? null;
 
-  function formateDate(dt) {
-
+  function formatDate(dt: string | null | undefined) {
+    if (!dt) return '';
+    const d = new Date(dt);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleString();
   }
 
-  async function handleAprrove() {
-    if
-    load
-    mess
+  async function handleApprove() {
+    if (!selected) return;
+    loadingAction = 'approve';
+    message = '';
 
     try {
-      const res = await fetch('', {
-        method:
-        headers:
+      const res = await fetch('/api/blackhole/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sub
-          rev
+          submissionId: selected.id,
+          reviewer: user.username ?? 'reviewer'
         })
       });
 
-      const
-      sub
-      mes
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Failed to approve');
+      }
 
-      se
+      const updated = await res.json();
+      submissions = submissions.filter((x: any) => x.id !== selected.id);
+      message = `Approved submission ${updated.id}`;
+
+      // move selection to next
+      selectedId = submissions[0]?.id ?? null;
     } catch (err) {
-      c
-      m
+      const e = err as Error;
+      message = e.message ?? 'Error approving';
     } finally {
-      l
+      loadingAction = null;
     }
   }
 
   async function handleReject() {
-    if (!) return;
+    if (!selected) return;
     const reason =
-      w
-      ''
+      window.prompt('Reason for rejection? (optional)', selected.reason ?? '') ??
+      '';
 
-    load
-    m
+    loadingAction = 'reject';
+    message = '';
 
     try {
-      const res = await fetch('', {
-        method:
-        headers:
+      const res = await fetch('/api/blackhole/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          s
-          r
-          r
+          submissionId: selected.id,
+          reviewer: user.username ?? 'reviewer',
+          reason
         })
       });
 
-      if ( ) {
-        c
-        t
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Failed to reject');
       }
 
-      const
-      s
-      m
+      const updated = await res.json();
+      submissions = submissions.filter((x: any) => x.id !== selected.id);
+      message = `Rejected submission ${updated.id}`;
 
-      s
+      selectedId = submissions[0]?.id ?? null;
     } catch (err) {
-      c
-      m
+      const e = err as Error;
+      message = e.message ?? 'Error rejecting';
     } finally {
-      loading
+      loadingAction = null;
     }
   }
 </script>
@@ -112,26 +121,26 @@ import { handle } from "../../hooks.server";
       <div>
         <h1>Black Hole Reviewer</h1>
         <p>
-          logged in as <strong>{}</strong>
+          logged in as <strong>{user.username ?? 'Unknown'}</strong>
         </p>
       </div>
-      <div class="">
-        <span></span>
+      <div class="summary">
+        <span>pending submissions: {submissions.length}</span>
       </div>
     </header>
 
     {#if message}
-      <p></p>
+      <p class="flash">{message}</p>
     {/if}
 
-    {#if}
+    {#if !submissions || submissions.length === 0}
       <p class="empty">
-        no
+        no pending submissions — everything has been judged ✨
       </p>
     {:else}
       <section class="layout">
-        <!-- Left side, list of submissiojns-->
-         <aside class="list-panel">
+        <!-- LEFT: list of submissions -->
+        <aside class="list-panel">
           {#each submissions as s}
             <button
               type="button"
@@ -140,18 +149,16 @@ import { handle } from "../../hooks.server";
               on:click={() => (selectedId = s.id)}
             >
               <div class="line1">
-                <span class="username">{s.username ?? ''}</span>
+                <span class="username">{s.username ?? 'unknown user'}</span>
                 {#if s.status}
-                  <span class={"status" + s.status.toLowerCase()}>
-                    {s.status.lowerCase()}
+                  <span class={"status " + s.status.toLowerCase()}>
+                    {s.status.toLowerCase()}
                   </span>
                 {/if}
               </div>
-              
               <div class="line2">
                 <span>project: {s.project?.name ?? s.projectId}</span>
               </div>
-              
               <div class="line3">
                 <span>
                   coins: {s.coinsSpent ?? 0} · hours: {s.hackatimeHours ?? '—'}
@@ -164,7 +171,7 @@ import { handle } from "../../hooks.server";
           {/each}
         </aside>
 
-         <!-- Right side, details for da submissions -->
+        <!-- RIGHT: detail for selected submission -->
         <section class="detail-panel">
           {#if !selected}
             <p class="empty">select a submission from the left</p>
@@ -178,19 +185,19 @@ import { handle } from "../../hooks.server";
 
             <div class="detail-top">
               <div class="image-wrap">
-                {#if selected.project?projectImage}
-                <img
-                  src={selected.project.projectImage}
-                  alt={selected.project.name}
-                />
-              {:else if selected.project?.egg}
-                <img
+                {#if selected.project?.projectImage}
+                  <img
+                    src={selected.project.projectImage}
+                    alt={selected.project.name}
+                  />
+                {:else if selected.project?.egg}
+                  <img
                     src={selected.project.egg.startsWith('/') ? selected.project.egg : `/${selected.project.egg}`}
-                  alt={selected.project.name}
-                />
-              {:else}
-                <div class="placeholder">no image</div>
-              {/if}
+                    alt={selected.project.name}
+                  />
+                {:else}
+                  <div class="placeholder">no image</div>
+                {/if}
               </div>
 
               <div class="stats">
@@ -206,7 +213,7 @@ import { handle } from "../../hooks.server";
                   </div>
                 {/if}
                 {#if selected.createdTime}
-                  <div>submitted at: {formateDate(selected.createdTime)}</div>
+                  <div>submitted at: {formatDate(selected.createdTime)}</div>
                 {/if}
               </div>
             </div>
@@ -217,32 +224,32 @@ import { handle } from "../../hooks.server";
                 {#if selected.justification}
                   {selected.justification}
                 {:else}
-                  <span class="muted">no justification provided</span>
+                  <span class="muted">no justification provided.</span>
                 {/if}
               </p>
             </section>
 
-            {#if selected.project?.description || selected.project?.project?.promptinfo}
+            {#if selected.project?.description || selected.project?.promptinfo}
               <section class="text-block">
                 <h3>project notes</h3>
-                {#if}
+                {#if selected.project?.description}
                   <p>{selected.project.description}</p>
                 {/if}
                 {#if selected.project?.promptinfo}
-                  <p class="muted">{selected.projectinfo}</p>
+                  <p class="muted">{selected.project.promptinfo}</p>
                 {/if}
               </section>
             {/if}
 
             {#if selected.project?.shipURL || selected.project?.githubURL}
-              <section class="link">
+              <section class="links">
                 {#if selected.project?.shipURL}
                   <a
                     href={selected.project.shipURL}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    &gt; opend demo / storefron
+                    &gt; open demo / storefront
                   </a>
                 {/if}
                 {#if selected.project?.githubURL}
@@ -253,37 +260,36 @@ import { handle } from "../../hooks.server";
                   >
                     &gt; view github repo
                   </a>
-              {/if}
-          </section>
-        {/if}
-
-        <section class="actions">
-          <button
-            type="button"
-            on:click={handleAprrove}
-            disabled={loadingAction !== null}
-          >  
-            {#if loadingAction === 'approve'}
-              approving...
-            {:else}
-              approve
+                {/if}
+              </section>
             {/if}
-        </button>
 
-        <button
-          type="button"
-          on:click={handleReject}
-          disabled={loadingAction !== null}
-        >
-            {#if loadingAction === 'reject'}
-              rejecting...
-            {:else}
-              reject
-            {/if}
-          </button>
+            <section class="actions">
+              <button
+                type="button"
+                on:click={handleApprove}
+                disabled={loadingAction !== null}
+              >
+                {#if loadingAction === 'approve'}
+                  approving...
+                {:else}
+                  approve
+                {/if}
+              </button>
+              <button
+                type="button"
+                on:click={handleReject}
+                disabled={loadingAction !== null}
+              >
+                {#if loadingAction === 'reject'}
+                  rejecting...
+                {:else}
+                  reject
+                {/if}
+              </button>
+            </section>
+          {/if}
         </section>
-        {/if}  
-      </section>
       </section>
     {/if}
   </main>
@@ -291,24 +297,25 @@ import { handle } from "../../hooks.server";
 
 <style>
   .login {
-    min-height: 1000vh;
+    min-height: 100vh;
     padding: 2rem 1rem;
     max-width: 480px;
     margin: 0 auto;
     color: #f5f5f5;
     background: #000;
-    font-family: system-ui, -apple-system, 
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+      sans-serif;
   }
 
-  .login-form{
+  .login-form {
     margin-top: 1rem;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     gap: 0.5rem;
   }
 
   .login-form input {
-    padding: 0.4rem ;
+    padding: 0.4rem 0.6rem;
   }
 
   .login-form button {
@@ -324,7 +331,8 @@ import { handle } from "../../hooks.server";
     padding: 1.5rem;
     color: #f5f5f5;
     background: #000;
-    font-family: system-ui, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+      sans-serif;
   }
 
   .header {
@@ -334,7 +342,7 @@ import { handle } from "../../hooks.server";
     gap: 1rem;
     margin-bottom: 1rem;
   }
-  
+
   .header h1 {
     margin: 0 0 0.25rem;
     font-size: 1.6rem;
@@ -361,7 +369,7 @@ import { handle } from "../../hooks.server";
     align-items: flex-start;
   }
 
-  .list-panel{
+  .list-panel {
     max-height: calc(100vh - 150px);
     overflow-y: auto;
     border-right: 1px solid rgba(255, 255, 255, 0.12);
@@ -380,7 +388,7 @@ import { handle } from "../../hooks.server";
     border-radius: 0.4rem;
   }
 
-  .list-item.selected{
+  .list-item.selected {
     background: rgba(255, 255, 255, 0.06);
   }
 
@@ -423,7 +431,7 @@ import { handle } from "../../hooks.server";
   }
 
   .detail-header h2 {
-    display: 0 0 0.25rem;
+    margin: 0 0 0.25rem;
     font-size: 1.4rem;
   }
 
@@ -472,7 +480,7 @@ import { handle } from "../../hooks.server";
   }
 
   .text-block h3 {
-    margin: 0 0 0.25 rem;
+    margin: 0 0 0.25rem;
     font-size: 0.95rem;
     text-transform: lowercase;
   }
@@ -495,11 +503,11 @@ import { handle } from "../../hooks.server";
     text-decoration: none;
   }
 
-  .link a:hover {
+  .links a:hover {
     text-decoration: underline;
   }
 
-  .action {
+  .actions {
     display: flex;
     gap: 0.5rem;
   }
@@ -523,19 +531,16 @@ import { handle } from "../../hooks.server";
     .layout {
       grid-template-columns: 1fr;
     }
-
     .list-panel {
-      max-width: none;
+      max-height: none;
       border-right: none;
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       padding-right: 0;
       padding-bottom: 0.5rem;
       margin-bottom: 1rem;
     }
-
     .detail-top {
       flex-direction: column;
     }
   }
 </style>
-
