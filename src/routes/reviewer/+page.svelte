@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { handle } from "../../hooks.server";
+	import { toLowerCase } from "zod";
+import { handle } from "../../hooks.server";
 
   export let data: any;
   export let form: any; 
@@ -90,12 +91,12 @@
 
 {#if !data.authorized}
   <main class="login">
-    <h1></h1>
-    <p></p>
+    <h1>Reviewer Login</h1>
+    <p>enter the reviewer password to access black hole submissions.</p>
 
-    {}
-      <p></p>
-    {}
+    {#if form?.error}
+      <p>                                                       </p>
+    {/if}
 
     <form method="POST" class="login-form">
       <label>
@@ -131,41 +132,42 @@
       <section class="layout">
         <!-- Left side, list of submissiojns-->
          <aside class="list-panel">
-          {#each}
+          {#each submissions as s}
             <button
-              type=""
-              class
-              on
+              type="button"
+              class:selected={selectedId === s.id}
+              class="list-item"
+              on:click={() => (selectedId = s.id)}
             >
               <div class="line1">
-                <span></span>
-                {#if}
-                  <span>
-                    {}
+                <span class="username">{s.username ?? ''}</span>
+                {#if s.status}
+                  <span class={"status" + s.status.toLowerCase()}>
+                    {s.status.lowerCase()}
                   </span>
                 {/if}
               </div>
               
               <div class="line2">
-                <span></span>
+                <span>project: {s.project?.name ?? s.projectId}</span>
               </div>
               
               <div class="line3">
                 <span>
-                  c
+                  coins: {s.coinsSpent ?? 0} · hours: {s.hackatimeHours ?? '—'}
                 </span>
-                {#if}
-                  <span></span>
+                {#if s.createdTime}
+                  <span class="time">{formatDate(s.createdTime)}</span>
                 {/if}
               </div>
             </button>
           {/each}
         </aside>
 
-         <!-- Right side, details for da submission -->
+         <!-- Right side, details for da submissions -->
         <section class="detail-panel">
-          {#if}
-            <p
+          {#if !selected}
+            <p class="empty">select a submission from the left</p>
           {:else}
             <header class="detail-header">
               <h2>{selected.project?.name ?? 'Untitled project'}</h2>

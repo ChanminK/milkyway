@@ -7,6 +7,7 @@ const REVIEWER_PASSWORD = env.REVIEWER_PASSWORD;
 
 export async function load({ locals, cookies }) {
   // gonna get rid of this... soon-ish
+  //did tongyu fix this yet tho
   if (!locals.user) throw redirect(302, '/');
 
   const authorized = cookies.get('reviewer_auth') === '1';
