@@ -1,12 +1,87 @@
 <script lang="ts">
+	import { handle } from "../../hooks.server";
+
   export let data: any;
   export let form: any; 
 
   let user = data.user ?? {};
-  let submissions = data.submissions ?? [];
+  let submissions = Array.isArray(data.submissions) ? data.submissions : [];
 
-  let loadingId: string | null = null;
+  let selectedId: string | null = submissions[0].id ?? null; 
+  let loadingAction: 'approve' | 'reject' | null = null;
   let message = '';
+
+  $: selected = submissions.find()
+
+  function formateDate(dt) {
+
+  }
+
+  async function handleAprrove() {
+    if
+    load
+    mess
+
+    try {
+      const res = await fetch('', {
+        method:
+        headers:
+        body: JSON.stringify({
+          sub
+          rev
+        })
+      });
+
+      const
+      sub
+      mes
+
+      se
+    } catch (err) {
+      c
+      m
+    } finally {
+      l
+    }
+  }
+
+  async function handleReject() {
+    if (!) return;
+    const reason =
+      w
+      ''
+
+    load
+    m
+
+    try {
+      const res = await fetch('', {
+        method:
+        headers:
+        body: JSON.stringify({
+          s
+          r
+          r
+        })
+      });
+
+      if ( ) {
+        c
+        t
+      }
+
+      const
+      s
+      m
+
+      s
+    } catch (err) {
+      c
+      m
+    } finally {
+      loading
+    }
+  }
 </script>
 
 <svelte:head>
@@ -14,137 +89,451 @@
 </svelte:head>
 
 {#if !data.authorized}
-  <h1>Reviewer Login</h1>
-  <p>Enter da password please</p>
+  <main class="login">
+    <h1></h1>
+    <p></p>
 
-  {#if form?.error}
-    <p style="color: red;">{form.error}</p>
-  {/if}
+    {}
+      <p></p>
+    {}
 
-  <form method="POST">
-    <label>
-      Password
-      <input type="password" name="password" required />
-    </label>
-    <button type="submit">Enter</button>
-  </form>
+    <form method="POST" class="login-form">
+      <label>
+        P
+        <input type="password" name="password" required />
+      </label>
+      <bu
+    </form>
+  </main>
 {:else}
-  <h1>Reviewer Panel</h1>
+  <main class="page">
+    <header class="header">
+      <div>
+        <h1></h1>
+        <p>
+          l
+        </p>
+      </div>
+      <div>
+        <span></span>
+      </div>
+    </header>
 
-  <p>
-    Logged in as <strong>{user.username ?? 'Unknown'}</strong>
-  </p>
+    {#if message}
+      <p></p>
+    {/if}
 
-  {#if message}
-    <p>{message}</p>
-  {/if}
-
-  <h2>Pending submissions</h2>
-
-  {#if !submissions || submissions.length === 0}
-    <p>No pending submissions LETS FREAKING GOOOOOOO</p>
-  {:else}
-    <ul>
-      {#each submissions as s}
-        <li>
-          <div>
-            <strong>{s.username}</strong> · project: {s.projectId}
-          </div>
-          <div>
-            Coins spent: {s.coinsSpent} · Hours: {s.hackatimeHours}
-          </div>
-
-          <!-- approving projects -->
-          <button
-            on:click={async () => {
-              loadingId = s.id;
-              message = '';
-              try {
-                const res = await fetch('/api/blackhole/approve', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    submissionId: s.id,
-                    reviewer: user.username ?? 'reviewer'
-                  })
-                });
-
-                if (!res.ok) {
-                  const text = await res.text();
-                  throw new Error(text || 'Failed to approve');
-                }
-
-                const updated = await res.json();
-                submissions = submissions.filter((x: any) => x.id !== s.id);
-                message = `Approved submission ${updated.id}`;
-              } catch (err) {
-                const e = err as Error;
-                message = e.message ?? 'Error approving';
-              } finally {
-                loadingId = null;
-              }
-            }}
-            disabled={loadingId === s.id}
-          >
-            {#if loadingId === s.id}Approving...{:else}Approve{/if}
-          </button>
-
-          <!-- rejecting projects -->
-          <button
-            on:click={async () => {
-              const reason =
-                window.prompt('Reason for rejection? (optional)', '') ?? '';
-              loadingId = s.id;
-              message = '';
+    {#if}
+      <p class="empty">
+        no
+      </p>
+    {:else}
+      <section class="layout">
+        <!-- Left side, list of submissiojns-->
+         <aside class="list-panel">
+          {#each}
+            <button
+              type=""
+              class
+              on
+            >
+              <div class="line1">
+                <span></span>
+                {#if}
+                  <span>
+                    {}
+                  </span>
+                {/if}
+              </div>
               
-              try {
-                const res = await fetch('/api/blackhole/reject', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    submissionId: s.id,
-                    reviewer: user.username ?? 'reviewer',
-                    reason
-                  })
-                });
+              <div class="line2">
+                <span></span>
+              </div>
+              
+              <div class="line3">
+                <span>
+                  c
+                </span>
+                {#if}
+                  <span></span>
+                {/if}
+              </div>
+            </button>
+          {/each}
+        </aside>
 
-                if (!res.ok) {
-                  const text = await res.text();
-                  throw new Error(text || 'Failed to reject');
-                }
-        
-                const updated = await res.json();
-                submissions = submissions.filter((x: any) => x.id !== s.id);
-                message = `Rejected submission ${updated.id}`;
-              } catch (err) {
-                const e = err as Error;
-                message = e.message ?? 'Error rejecting';
-              } finally {
-                loadingId = null;
-              }
-            }}
-            disabled={loadingId === s.id}
-          >
-            {#if loadingId === s.id}Rejecting...{:else}Reject{/if}
+         <!-- Right side, details for da submission -->
+        <section class="detail-panel">
+          {#if}
+            <p
+          {:else}
+            <header class="detail-header">
+              <h2>{selected.project?.name ?? 'Untitled project'}</h2>
+              <p>
+                submitted by <strong>{selected.username ?? 'unknown user'}</strong>
+              </p>
+            </header>
+
+            <div class="detail-top">
+              <div class="image-wrap">
+                {#if selected.project?projectImage}
+                <img
+                  src={selected.project.projectImage}
+                  alt={selected.project.name}
+                />
+              {:else if selected.project?.egg}
+                <img
+                    src={selected.project.egg.startsWith('/') ? selected.project.egg : `/${selected.project.egg}`}
+                  alt={selected.project.name}
+                />
+              {:else}
+                <div class="placeholder">no image</div>
+              {/if}
+              </div>
+
+              <div class="stats">
+                <div>coins spent: <strong>{selected.coinsSpent ?? 0}</strong></div>
+                <div>
+                  hours (submitted):{' '}
+                  <strong>{selected.hackatimeHours ?? 'unknown'}</strong>
+                </div>
+                {#if selected.stellarshipsAtSubmission != null}
+                  <div>
+                    stellarships at submission:{' '}
+                    <strong>{selected.stellarshipsAtSubmission}</strong>
+                  </div>
+                {/if}
+                {#if selected.createdTime}
+                  <div>submitted at: {formateDate(selected.createdTime)}</div>
+                {/if}
+              </div>
+            </div>
+
+            <section class="text-block">
+              <h3>justification</h3>
+              <p>
+                {#if selected.justification}
+                  {selected.justification}
+                {:else}
+                  <span class="muted">no justification provided</span>
+                {/if}
+              </p>
+            </section>
+
+            {#if selected.project?.description || selected.project?.project?.promptinfo}
+              <section class="text-block">
+                <h3>project notes</h3>
+                {#if}
+                  <p>{selected.project.description}</p>
+                {/if}
+                {#if selected.project?.promptinfo}
+                  <p class="muted">{selected.projectinfo}</p>
+                {/if}
+              </section>
+            {/if}
+
+            {#if selected.project?.shipURL || selected.project?.githubURL}
+              <section class="link">
+                {#if selected.project?.shipURL}
+                  <a
+                    href={selected.project.shipURL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    &gt; opend demo / storefron
+                  </a>
+                {/if}
+                {#if selected.project?.githubURL}
+                  <a
+                    href={selected.project.githubURL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    &gt; view github repo
+                  </a>
+              {/if}
+          </section>
+        {/if}
+
+        <section class="actions">
+          <button
+            type="button"
+            on:click={handleAprrove}
+            disabled={loadingAction !== null}
+          >  
+            {#if loadingAction === 'approve'}
+              approving...
+            {:else}
+              approve
+            {/if}
+        </button>
+
+        <button
+          type="button"
+          on:click={handleReject}
+          disabled={loadingAction !== null}
+        >
+            {#if loadingAction === 'reject'}
+              rejecting...
+            {:else}
+              reject
+            {/if}
           </button>
-        </li>
-      {/each}
-    </ul>
-  {/if}
+        </section>
+        {/if}  
+      </section>
+      </section>
+    {/if}
+  </main>
 {/if}
 
 <style>
-  ul {
-    list-style: none;
-    padding: 0;
+  .login {
+    min-height: 1000vh;
+    padding: 2rem 1rem;
+    max-width: 480px;
+    margin: 0 auto;
+    color: #f5f5f5;
+    background: #000;
+    font-family: system-ui, -apple-system, 
   }
-  li {
-    border: 1px solid #444;
-    padding: 8px;
-    margin: 6px 0;
+
+  .login-form{
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column; 
+    gap: 0.5rem;
   }
-  button {
-    margin-right: 6px;
+
+  .login-form input {
+    padding: 0.4rem ;
+  }
+
+  .login-form button {
+    margin-top: 0.5rem;
+  }
+
+  .error {
+    color: #ff8c8c;
+  }
+
+  .page {
+    min-height: 100vh;
+    padding: 1.5rem;
+    color: #f5f5f5;
+    background: #000;
+    font-family: system-ui, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .header h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.6rem;
+  }
+
+  .summary {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .flash {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .empty {
+    margin-top: 2rem;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .list-panel{
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    padding-right: 0.5rem;
+  }
+
+  .list-item {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 0.4rem;
+    margin-bottom: 0.25rem;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 0.4rem;
+  }
+
+  .list-item.selected{
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .line1,
+  .line2,
+  .line3 {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .username {
+    font-weight: 600;
+  }
+
+  .status {
+    text-transform: lowercase;
+    font-size: 0.8rem;
+  }
+
+  .status.pending {
+    color: #ffe28c;
+  }
+
+  .status.approved {
+    color: #8cff8c;
+  }
+
+  .status.rejected {
+    color: #ff8c8c;
+  }
+
+  .time {
+    opacity: 0.7;
+  }
+
+  .detail-panel {
+    padding-left: 0.5rem;
+  }
+
+  .detail-header h2 {
+    display: 0 0 0.25rem;
+    font-size: 1.4rem;
+  }
+
+  .detail-top {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .image-wrap {
+    width: 180px;
+    min-width: 140px;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .image-wrap img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+
+  .placeholder {
+    font-size: 0.85rem;
+    opacity: 0.6;
+  }
+
+  .stats {
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    justify-content: center;
+  }
+
+  .text-block {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .text-block h3 {
+    margin: 0 0 0.25 rem;
+    font-size: 0.95rem;
+    text-transform: lowercase;
+  }
+
+  .muted {
+    opacity: 0.75;
+    font-style: italic;
+  }
+
+  .links {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .links a {
+    color: #f5f5f5;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .link a:hover {
+    text-decoration: underline;
+  }
+
+  .action {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .actions button {
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #111;
+    color: #f5f5f5;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+
+  .actions button:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  @media (max-width: 800px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .list-panel {
+      max-width: none;
+      border-right: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-right: 0;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .detail-top {
+      flex-direction: column;
+    }
   }
 </style>
 

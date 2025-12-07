@@ -104,7 +104,6 @@ function normalizeSubmission(record) {
     justification: f.Justification ?? null,
     reviewer: f.Reviewer ?? null,
     reason: f.Reason ?? null,
-    justification: f.Justification ?? null,
     createdTime: record._rawJson?.createdTime ?? null
   };
 }
@@ -190,15 +189,6 @@ export async function submitToBlackhole(rawInput) {
     );
   }
 
-
-  //Checking if submitted
-  const alreadySubmitted = await hasActiveSubmission(user.id, project.id);
-  if (alreadySubmitted) {
-    throw new Error(
-      'This project already has a pending or approved black hole submission.'
-    );
-  }
-
   // Hackatime hours
   const hackatimeHours = Number(project.fields.hackatimeHours ?? 0);
   if (hackatimeHours < MIN_HOURS_REQUIRED) {
@@ -226,8 +216,6 @@ export async function submitToBlackhole(rawInput) {
     CoinsAfter: coinsAfter,
     HackatimeHoursAtSubmission: hackatimeHours,
     StellarshipsAtSubmission: stellarships,
-    submissionNumber,
-    Justification: justification ?? ''
     submissionNumber,
     Justification: justification ?? ''
   });
